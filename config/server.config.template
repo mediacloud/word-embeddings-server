@@ -1,0 +1,6 @@
+
+[sentry]
+dsn = https://<key>:<secret>@app.getsentry.com/<project>
+
+[server]
+secret_key = SECRET_KEY
