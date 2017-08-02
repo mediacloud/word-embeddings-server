@@ -26,8 +26,7 @@ else:
 
 # Set up some logging
 if SENTRY_DSN:
-    entry = Sentry(dsn=SENTRY_DSN)
-    handler = SentryHandler(settings.get('sentry', 'dsn'))
+    handler = SentryHandler(SENTRY_DSN)
     setup_logging(handler)
 else:
     logging.info("No sentry logging")
