@@ -4,6 +4,8 @@ import gensim
 
 from server import base_dir
 
+MODEL_DIR = "models"
+
 MODEL_GOOGLE_NEWS = "GoogleNews-vectors-negative300.bin"
 
 logger = logging.getLogger(__name__)
@@ -32,4 +34,4 @@ def _load_model(name):
 
 
 def _path_to_model(name):
-    return os.path.join(base_dir, 'models', name)
+    return os.path.join(base_dir, MODEL_DIR, name)
