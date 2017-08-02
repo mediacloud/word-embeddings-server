@@ -14,7 +14,6 @@ logging.basicConfig(level=logging.DEBUG)
 log_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 log_handler = logging.FileHandler(os.path.join('logs', 'test.log'))
 log_handler.setFormatter(log_formatter)
-# set up mediacloud logging to the file
 
 # now run all the tests
 suites = [unittest.TestLoader().loadTestsFromTestCase(test_class) for test_class in test_classes]
