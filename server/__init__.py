@@ -21,15 +21,8 @@ if os.path.exists(server_config_file_path):
     SECRET_KEY = settings.get('server', 'secret_key')
 else:
     logging.info("Loading settings from environment variables")
-    SENTRY_DSN = os.environ['SENTRY_DSN']
+    SENTRY_DSN = os.environ['SENTRY_DSN']   # it would do this by default, but let's be intentional about it
     SECRET_KEY = os.environ['SECRET_KEY']
-
-# Set up some logging
-if SENTRY_DSN:
-    handler = SentryHandler(SENTRY_DSN)
-    setup_logging(handler)
-else:
-    logging.info("No sentry logging")
 
 with open(os.path.join(base_dir, 'config', 'logging.json'), 'r') as f:
     logging_config = json.load(f)
@@ -38,11 +31,21 @@ logging.config.dictConfig(logging_config)
 logger = logging.getLogger(__name__)
 logger.info("---------------------------------------------------------------------------")
 
+# Set up sentry logging service
+if SENTRY_DSN:
+    handler = SentryHandler(SENTRY_DSN)
+    setup_logging(handler)
+else:
+    logging.info("No sentry logging")
+
 
 def create_app():
+    global SENTRY_DSN
     # Factory method to create the app
     my_app = Flask(__name__)
     my_app.secret_key = SECRET_KEY
+    if SENTRY_DSN:
+        Sentry(app, dsn=SENTRY_DSN)
     return my_app
 
 app = create_app()
