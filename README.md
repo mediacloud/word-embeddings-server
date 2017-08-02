@@ -41,3 +41,7 @@ Deploying
 ---------
 
 This is configured to deploy as a Heroku buildpack to [dokku](http://dokku.viewdocs.io/dokku/).
+
+You'll need to do something like this to set the required environment variables:
+
+`dokku config:set word-embeddings SECRET_KEY=oiwajj243josadjoi SENTRY_DSN=https://THING1:THING2@sentry.io/THING3`

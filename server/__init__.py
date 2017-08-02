@@ -10,22 +10,27 @@ from raven.handlers.logging import SentryHandler
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # load the settings
-settings = None # on deployed instance these will be ENV_VARS
 server_config_file_path = os.path.join(base_dir, 'config', 'server.config')
+SENTRY_DSN = None
+SECRET_KEY = None
 if os.path.exists(server_config_file_path):
+    logging.info("Loading settings from config/server.config")
     settings = ConfigParser.ConfigParser()
     settings.read(server_config_file_path)
+    SENTRY_DSN = settings.get('sentry', 'dsn')
+    SECRET_KEY = settings.get('server', 'secret_key')
 else:
-    logging.warn("no settings!")
-    # TODO: load from environment variables
+    logging.info("Loading settings from environment variables")
+    SENTRY_DSN = os.environ['SENTRY_DSN']
+    SECRET_KEY = os.environ['SECRET_KEY']
 
 # Set up some logging
-try:
-    entry = Sentry(dsn=settings.get('sentry', 'dsn'))
+if SENTRY_DSN:
+    entry = Sentry(dsn=SENTRY_DSN)
     handler = SentryHandler(settings.get('sentry', 'dsn'))
     setup_logging(handler)
-except Exception:
-    logging.info("no sentry logging")
+else:
+    logging.info("No sentry logging")
 
 with open(os.path.join(base_dir, 'config', 'logging.json'), 'r') as f:
     logging_config = json.load(f)
@@ -38,10 +43,10 @@ logger.info("-------------------------------------------------------------------
 def create_app():
     # Factory method to create the app
     my_app = Flask(__name__)
+    my_app.secret_key = SECRET_KEY
     return my_app
 
 app = create_app()
-app.secret_key = settings.get('server', 'secret_key')
 
 # now load in the appropriate view endpoints, after the app has been initialized
 import server.views
