@@ -3,7 +3,7 @@
   "description": "Helpful micro-service to return results from word2vec models",
   "scripts": {
     "dokku": {
-      "predeploy": "python download_word2vec_model.py"
+      "predeploy": "python scripts/download_word2vec_model.py"
     }
   }
 }
