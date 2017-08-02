@@ -2,6 +2,7 @@ import os
 import logging.config
 import ConfigParser
 import json
+import sys
 from flask import Flask
 from raven.conf import setup_logging
 from raven.contrib.flask import Sentry
@@ -21,8 +22,12 @@ if os.path.exists(server_config_file_path):
     SECRET_KEY = settings.get('server', 'secret_key')
 else:
     logging.info("Loading settings from environment variables")
-    SENTRY_DSN = os.environ['SENTRY_DSN']   # it would do this by default, but let's be intentional about it
-    SECRET_KEY = os.environ['SECRET_KEY']
+    try:
+        SENTRY_DSN = os.environ.get('SENTRY_DSN')   # it would do this by default, but let's be intentional about it
+        SECRET_KEY = os.environ.get('SECRET_KEY')
+    except KeyError:
+        logging.error("You need to define the SECRET_KEY environment variable")
+        sys.exit(0)
 
 with open(os.path.join(base_dir, 'config', 'logging.json'), 'r') as f:
     logging_config = json.load(f)
@@ -45,7 +50,7 @@ def create_app():
     my_app = Flask(__name__)
     my_app.secret_key = SECRET_KEY
     if SENTRY_DSN:
-        Sentry(app, dsn=SENTRY_DSN)
+        Sentry(my_app, dsn=SENTRY_DSN)
     return my_app
 
 app = create_app()
