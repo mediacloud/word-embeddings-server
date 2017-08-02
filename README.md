@@ -1,7 +1,7 @@
 Media Cloud Word Embeddings Server
 ==================================
 
-A micro-service to support analyzing words based on word embeedings (ala word2vec).
+A micro-service to support analyzing words based on models of word embeddings (aka. "word2vec").
 
 Dev Installation
 ----------------
@@ -14,8 +14,9 @@ Python 2.7:
  * On Window, make sure to create an environment variable: `set NODE_ENV=dev`
  * in MediaMeter directory run `pip install -r requirements.txt` 
  
-And you have to download and install the GoogleNews model yourself:
-`wget https://github.com/mmihaltz/word2vec-GoogleNews-vectors/blob/master/GoogleNews-vectors-negative300.bin.gz -P ./models/`
+And you have to download and install the GoogleNews model:
+
+`python scripts/download_word2vec_model.py`
  
 Developing
 ----------
@@ -25,19 +26,13 @@ We develop [with PyCharm](https://www.jetbrains.com/pycharm/).
 Running
 -------
 
-Run `python run.py` to test the app out.  Then do something like this to test it out:
-
-```python
-import requests
-response = requests.post("http://localhost:5000/embeddings/2d.json",
-                        data = {'words[]':['one', 'two', 'three'],
-                                'model':'GoogleNews-vectors-negative300.bin'})
-print response.json()
-```
+Run `python run.py` to test the app out.  
 
 This loads the GoogleNews model on startup, so it will take a minute to load.
 
-Or `./run.sh` to run it with gunicorn in a more production-like way.  You can test that with something like this:
+Or `./run.sh` to run it with gunicorn in a more production-like way.
+
+You can test that with something like this:
 
 ```python
 import requests
@@ -47,12 +42,7 @@ response = requests.post("http://localhost:8000/embeddings/2d.json",
 print response.json()
 ```
 
-
 Deploying
 ---------
 
-This is configured to deploy with docker.
-
-```
-docker run -p 8080:5000 mediacloud/wordembeddings
-```
+This is configured to deploy as a Heroku buildpack to [dokku](http://dokku.viewdocs.io/dokku/).

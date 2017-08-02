@@ -1,0 +1,1 @@
+web: gunicorn -t 500 server:app
