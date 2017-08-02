@@ -7,6 +7,8 @@ from raven.conf import setup_logging
 from raven.contrib.flask import Sentry
 from raven.handlers.logging import SentryHandler
 
+VERSION = "0.1"
+
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # just log to stdout so it works well on prod containers

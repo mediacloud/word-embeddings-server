@@ -3,7 +3,7 @@ from flask import request, jsonify
 import string
 from sklearn.decomposition import PCA
 
-from server import app
+from server import app, VERSION
 from request import form_fields_required
 from models import get_model
 
@@ -44,4 +44,7 @@ def embeddings_2d():
         else:
             results.append({'word': word, 'x': None, 'y': None})
 
-    return jsonify({'results': results})
+    return jsonify({
+        'results': results,
+        'version': VERSION
+    })
