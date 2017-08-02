@@ -27,7 +27,7 @@ Two options:
  1. Development: run `python run.py` to test it out  
  2. Production-like: run `./run.sh` to run it with gunicorn
 
-You can test that with something like this:
+You can test that with something like this (the first request takes a while to load the giant model into memory):
 
 ```python
 import requests
