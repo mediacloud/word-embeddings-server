@@ -10,12 +10,13 @@ from raven.handlers.logging import SentryHandler
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # just log to stdout so it works well on prod containers
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 # load the settings
 server_config_file_path = os.path.join(base_dir, 'config', 'server.config')
 SENTRY_DSN = None
 SECRET_KEY = None
+LOG_LEVEL = 'WARN'
 if os.path.exists(server_config_file_path):
     logging.info("Loading settings from config/server.config")
     settings = ConfigParser.ConfigParser()
@@ -27,9 +28,13 @@ else:
     try:
         SENTRY_DSN = os.environ.get('SENTRY_DSN')   # it would do this by default, but let's be intentional about it
         SECRET_KEY = os.environ.get('SECRET_KEY')
+        LOG_LEVEL = os.environ.get('LOG_LEVEL')
     except KeyError:
         logging.error("You need to define the SECRET_KEY environment variable")
         sys.exit(0)
+
+# just log to stdout so it works well on prod containers
+logging.basicConfig(stream=sys.stdout, level=logging.ERROR)
 
 logger = logging.getLogger(__name__)
 logger.info("---------------------------------------------------------------------------")
