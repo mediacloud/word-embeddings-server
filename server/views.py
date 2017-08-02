@@ -17,24 +17,31 @@ def embeddings_2d():
     words = request.form.getlist('words[]')
 
     # Remove words that are not in model vocab
-    to_be_removed = []
+    words_in_model = []
     for word in words:
         try:
             # remove punctuation
-            word = "".join(l for l in word if l not in string.punctuation)
-            word_vectors[word]
+            cleaned_word = "".join(l for l in word if l not in string.punctuation)
+            word_vectors[cleaned_word]
+            words_in_model.append({'word': word, 'cleaned_word': cleaned_word})
         except KeyError:
-            to_be_removed.append(word)
-    for word in to_be_removed:
-        words.remove(word)
+            # ignore words not in model
+            pass
 
     # reduce to a 2d representation for charting purposes
-    embeddings = [word_vectors[word] for word in words]
+    embeddings = [word_vectors[word] for word in [w['cleaned_word'] for w in words_in_model]]
     pca = PCA(n_components=2)
     two_d_embeddings = pca.fit_transform(embeddings).tolist()
+    words_with_model_info = []
+    for i in range(len(words_in_model)):
+        words_with_model_info.append({'word': words_in_model[i]['word'], 'x': two_d_embeddings[i][0], 'y': two_d_embeddings[i][1]})
 
-    data = []
-    for i in range(len(words)):
-        data.append({'word': words[i], 'x': two_d_embeddings[i][0], 'y': two_d_embeddings[i][1]})
+    results = []
+    for word in words:
+        word_model_data = next(iter([w for w in words_with_model_info if w["word"] == word]), None)
+        if word_model_data:
+            results.append({'word': word, 'x': word_model_data['x'], 'y': word_model_data['y']})
+        else:
+            results.append({'word': word, 'x': None, 'y': None})
 
-    return jsonify({'results': data})
+    return jsonify({'results': results})
