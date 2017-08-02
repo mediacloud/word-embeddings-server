@@ -1,7 +1,6 @@
 import os
 import logging.config
 import ConfigParser
-import json
 import sys
 from flask import Flask
 from raven.conf import setup_logging
@@ -9,6 +8,9 @@ from raven.contrib.flask import Sentry
 from raven.handlers.logging import SentryHandler
 
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# just log to stdout so it works well on prod containers
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 # load the settings
 server_config_file_path = os.path.join(base_dir, 'config', 'server.config')
@@ -29,10 +31,6 @@ else:
         logging.error("You need to define the SECRET_KEY environment variable")
         sys.exit(0)
 
-with open(os.path.join(base_dir, 'config', 'logging.json'), 'r') as f:
-    logging_config = json.load(f)
-    logging_config['handlers']['file']['filename'] = os.path.join(base_dir, logging_config['handlers']['file']['filename'])
-logging.config.dictConfig(logging_config)
 logger = logging.getLogger(__name__)
 logger.info("---------------------------------------------------------------------------")
 

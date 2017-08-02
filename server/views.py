@@ -3,7 +3,7 @@ from flask import request, jsonify
 import string
 from sklearn.decomposition import PCA
 
-from server import app, base_dir
+from server import app
 from request import form_fields_required
 from models import get_model
 
