@@ -34,6 +34,7 @@ logging.config.dictConfig(logging_config)
 logger = logging.getLogger(__name__)
 logger.info("---------------------------------------------------------------------------")
 
+
 def create_app():
     # Factory method to create the app
     my_app = Flask(__name__)
@@ -41,12 +42,6 @@ def create_app():
 
 app = create_app()
 app.secret_key = settings.get('server', 'secret_key')
-
-# prefill the google news model for deterministic query times once server has started
-import server.models
-logger.info("Pre-loading GoogleNews model...")
-models.get_model(models.MODEL_GOOGLE_NEWS)
-logger.info("  done - ready for requests!")
 
 # now load in the appropriate view endpoints, after the app has been initialized
 import server.views
