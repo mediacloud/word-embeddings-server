@@ -48,3 +48,18 @@ def embeddings_2d():
         'results': results,
         'version': VERSION
     })
+
+@app.route('/embeddings/<word>/similar-words.json', methods=['POST'])
+@form_fields_required('model')
+def embeddings_similar_words(word):
+    word_vectors = get_model(request.form['model'])
+    similar_words = word_vectors.most_similar(word)
+
+    results = []
+    for sim_word in similar_words:
+        results.append({'word': sim_word[0], 'score': sim_word[1]})
+
+    return jsonify({
+        'results': results,
+        'version': VERSION
+    })
