@@ -7,7 +7,7 @@ from raven.conf import setup_logging
 from raven.contrib.flask import Sentry
 from raven.handlers.logging import SentryHandler
 
-VERSION = "0.1"
+VERSION = "1.0.0"
 
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -36,7 +36,7 @@ else:
         sys.exit(0)
 
 # just log to stdout so it works well on prod containers
-logging.basicConfig(stream=sys.stdout, level=logging.ERROR)
+logging.basicConfig(stream=sys.stdout, level=LOG_LEVEL)
 
 logger = logging.getLogger(__name__)
 logger.info("---------------------------------------------------------------------------")

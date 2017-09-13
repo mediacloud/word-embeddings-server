@@ -33,8 +33,11 @@ def embeddings_2d():
     pca = PCA(n_components=2)
     two_d_embeddings = pca.fit_transform(embeddings).tolist()
     words_with_model_info = []
-    for i in range(len(words_in_model)):
-        words_with_model_info.append({'word': words_in_model[i]['word'], 'x': two_d_embeddings[i][0], 'y': two_d_embeddings[i][1]})
+    if len(words_in_model) != len(two_d_embeddings):    # safety check before processing
+        logger.warn("Number of results from model didn't match input length - maybe foreign words?")
+    else:
+        for i in range(len(words_in_model)):
+            words_with_model_info.append({'word': words_in_model[i]['word'], 'x': two_d_embeddings[i][0], 'y': two_d_embeddings[i][1]})
 
     results = []
     for word in words:

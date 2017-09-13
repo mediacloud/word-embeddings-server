@@ -45,3 +45,10 @@ This is configured to deploy as a Heroku buildpack to [dokku](http://dokku.viewd
 You'll need to do something like this to set the required environment variables:
 
 `dokku config:set word-embeddings SECRET_KEY=oiwajj243josadjoi SENTRY_DSN=https://THING1:THING2@sentry.io/THING3`
+
+Releasing
+---------
+
+1. Update the semantic version number in `server/__init.py__`
+2. Tag the repository with that number, like `v1.0.1`
+3. Push it to the server, like `git push dokku master`
