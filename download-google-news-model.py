@@ -1,7 +1,8 @@
 import os
 import urllib
 
-MODEL_GOOGLE_NEWS_URL = "https://dl.dropboxusercontent.com/u/466924777/GoogleNews-vectors-negative300.bin"
+# this is hosted in Rahul's MIT Dropbox folder
+MODEL_GOOGLE_NEWS_URL = "https://www.dropbox.com/s/ube0ajo5jej8g62/GoogleNews-vectors-negative300.bin?dl=0"
 
 model_dir = "./models"
 model_name = "GoogleNews-vectors-negative300.bin"
