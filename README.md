@@ -20,6 +20,12 @@ Developing
 
 We develop [with PyCharm](https://www.jetbrains.com/pycharm/).
 
+Set up the following environment variables:
+
+ * **SENTRY_DSN**: the DSN for Sentry logging
+ * **SECRET_KEY**: the secret key for Flask
+ * **MC_API_KEY**: your Media Cloud API Key
+
 Running
 -------
 
@@ -36,6 +42,12 @@ response = requests.post("http://localhost:8000/embeddings/2d.json",
                                 'model':'GoogleNews-vectors-negative300.bin'})
 print response.json()
 ```
+
+Creating a Topic Model
+----------------------
+
+To create a model for a topic, run `python scripts/create-topic-model.py TOPIC_ID`.  That will save a model file into
+the `models` folder.
 
 Deploying
 ---------
