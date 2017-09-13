@@ -1,20 +1,28 @@
 import os
-import urllib
+import requests
+import shutil
 
 # this is hosted in Rahul's MIT Dropbox folder
-MODEL_GOOGLE_NEWS_URL = "https://www.dropbox.com/s/ube0ajo5jej8g62/GoogleNews-vectors-negative300.bin?dl=0"
+MODEL_GOOGLE_NEWS_URL = "https://www.dropbox.com/s/ube0ajo5jej8g62/GoogleNews-vectors-negative300.bin?dl=1"
 
 model_dir = "./models"
 model_name = "GoogleNews-vectors-negative300.bin"
 
-model_file_name = os.path.join(model_dir, model_name)
+path_to_model_file = os.path.join(model_dir, model_name)
 
 if not os.path.exists(model_dir):
     os.mkdir(model_dir)
 
-if not os.path.isfile(model_file_name):
+
+# https://stackoverflow.com/a/39217788/1172063
+def download_file(url, destination_file):
+    r = requests.get(url, stream=True)
+    with open(destination_file, 'wb') as f:
+        shutil.copyfileobj(r.raw, f)
+
+if os.path.isfile(path_to_model_file):
     print "Google word2vec model not found, downloading model file from the cloud..."
-    urllib.urlretrieve(MODEL_GOOGLE_NEWS_URL, model_file_name)
+    download_file(MODEL_GOOGLE_NEWS_URL, path_to_model_file)
     print "  done!"
 else:
     print "Google word2vec model already exists."
