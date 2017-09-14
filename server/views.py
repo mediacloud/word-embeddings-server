@@ -52,6 +52,7 @@ def embeddings_2d():
         'version': VERSION
     })
 
+
 @app.route('/embeddings/<word>/similar-words.json', methods=['GET'])
 def embeddings_similar_words(word):
     word_vectors = get_model(request.args.get('model'))
