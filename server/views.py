@@ -49,10 +49,9 @@ def embeddings_2d():
         'version': VERSION
     })
 
-@app.route('/embeddings/<word>/similar-words.json', methods=['POST'])
-@form_fields_required('model')
+@app.route('/embeddings/<word>/similar-words.json', methods=['GET'])
 def embeddings_similar_words(word):
-    word_vectors = get_model(request.form['model'])
+    word_vectors = get_model(request.args.get('model'))
     similar_words = word_vectors.most_similar(word)
 
     results = []
