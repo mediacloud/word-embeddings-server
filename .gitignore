@@ -6,3 +6,4 @@ server/__init__.pyc
 config/server.config
 set-env-vars.sh
 models/*
+venv
