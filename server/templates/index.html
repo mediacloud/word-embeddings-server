@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Word Embeddings Server | Media Cloud</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Media Cloud Word Embeddings Server</h1>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+
+                <h2>Input</h2>
+                <form name="2dEmbeddings">
+                  <div class="form-group">
+                    <label for="model">Model</label>
+                    <select id="model" name="model" class="form-control">
+                        {%  for model in models %}
+                            <option>{{ model }}</option>
+                        {%  endfor %}
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="words">Words</label>
+                    <textarea id="words" class="form-control" name="words" rows="10" placeholder="One word per line"></textarea>
+                  </div>
+                  <button id="2dPositionsButton" type="button" class="btn btn-default">2d Positions</button>
+                  <button id="similarWords" type="button" class="btn btn-default">Similar Words</button>
+                </form>
+
+            </div>
+            <div class="col-md-6">
+
+                <h2>Results</h2>
+                <pre id="results"></pre>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script type="text/javascript">
+
+        function getData(){
+            var model = $('#model').val();
+            var words = $('#words').val().split(/\r?\n/);
+            console.log(words);
+            var data = {'model': model, 'words': words};
+            return data;
+        }
+
+        function handleResults(results){
+            $('#results').html(JSON.stringify(results, null, 2));
+        }
+
+        $('#2dPositionsButton').click(function() {
+            $.post('/embeddings/2d.json', getData())
+                .done(handleResults);
+        });
+
+        $('#similarWords').click(function() {
+            var data = getData();
+            $.get('/embeddings/'+data.words[0]+'/similar-words.json?model='+data['model'])
+                .done(handleResults);
+        });
+
+    </script>
+
+</body>
+
+</html>
