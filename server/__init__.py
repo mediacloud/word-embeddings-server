@@ -7,7 +7,7 @@ from raven.conf import setup_logging
 from raven.contrib.flask import Sentry
 from raven.handlers.logging import SentryHandler
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
