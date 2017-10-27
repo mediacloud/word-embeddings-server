@@ -23,18 +23,16 @@ except KeyError:
 
 mc = mediacloud.api.AdminMediaCloud(MC_API_KEY)
 
-TOPIC_ID = sys.argv[1]
-
 STORIES_PER_FETCH_DEFAULT = 1000
 MODEL_SIZE_DEFAULT = 100
 MIN_COUNT_DEFAULT = 1
 NUM_WORKERS_DEFAULT = 4
 
 
-def download_topic_sentences(output_file_path):
+def download_topic_sentences(output_file_path, topic_id):
     logger.info('Grabbing topic sentences to {}'.format(output_file_path))
 
-    query = '{~ topic:'+TOPIC_ID+'}'
+    query = '{~ topic:'+topic_id+'}'
     logger.info('  Query: ' + query)
 
     stories_per_fetch = os.getenv('STORIES_PER_FETCH', STORIES_PER_FETCH_DEFAULT)
@@ -84,12 +82,18 @@ def train_topic(topic_sentences, output_file_name):
 
 # Create word2vec topic model:
 if __name__ == '__main__':
+    topic_id = sys.argv[1]
+    try:
+        topic_id = str(int(topic_id))  # validate input is an integer
+    except ValueError:
+        raise ValueError('Argument must be an integer for a topic id')
+
     # grab sentences (setup export file so we can write as we fetch)
-    sentences_file_path = os.path.join(tempfile.gettempdir(), TOPIC_ID+'-sentences.txt')
-    download_topic_sentences(sentences_file_path)
+    sentences_file_path = os.path.join(tempfile.gettempdir(), topic_id + '-sentences.txt')
+    download_topic_sentences(sentences_file_path, topic_id)
 
     # train w2v topic model
-    model_file_path = os.path.join(BASE_DIR, OUTPUT_DIR, 'w2v-topic-model-' + TOPIC_ID)
+    model_file_path = os.path.join(BASE_DIR, OUTPUT_DIR, 'w2v-topic-model-' + topic_id)
     with codecs.open(sentences_file_path, 'r', 'utf-8') as f:
         sentences = gensim.models.word2vec.LineSentence(f)
         train_topic(sentences, model_file_path)
