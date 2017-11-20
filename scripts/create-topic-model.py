@@ -27,6 +27,7 @@ STORIES_PER_FETCH_DEFAULT = 1000
 MODEL_SIZE_DEFAULT = 100
 MIN_COUNT_DEFAULT = 1
 NUM_WORKERS_DEFAULT = 4
+MAX_VOCAB_DEFAULT = 5000
 
 
 def download_topic_sentences(output_file_path, topic_id):
@@ -73,8 +74,9 @@ def train_topic(topic_sentences, output_file_name):
     model_size = os.getenv('SIZE', MODEL_SIZE_DEFAULT)
     min_count = os.getenv('MIN_COUNT', MIN_COUNT_DEFAULT)
     num_workers = os.getenv('WORKERS', NUM_WORKERS_DEFAULT)
+    max_vocab = os.getenv('MAX_VOCAB', MAX_VOCAB_DEFAULT)
 
-    model = gensim.models.Word2Vec(topic_sentences, size=model_size, min_count=min_count, workers=num_workers)
+    model = gensim.models.Word2Vec(topic_sentences, size=model_size, min_count=min_count, workers=num_workers, max_vocab_size=max_vocab)
     model.save(output_file_name)
 
     logger.info('Done!')
