@@ -20,11 +20,7 @@ Developing
 
 We develop [with PyCharm](https://www.jetbrains.com/pycharm/).
 
-Set up the following environment variables:
-
- * **SENTRY_DSN**: the DSN for Sentry logging
- * **SECRET_KEY**: the secret key for Flask
- * **MC_API_KEY**: your Media Cloud API Key
+Copy the `config/server.config.template` to `config/server.config` and fill in the values.
 
 Running
 -------
@@ -33,21 +29,16 @@ Two options:
  1. Development: run `python run.py` to test it out  
  2. Production-like: run `./run.sh` to run it with gunicorn
 
-You can test that with something like this (the first request takes a while to load the giant model into memory):
+You can then hit the local homepage to try it out from a simple web-testing harness: `http://localhost:8000`
+
+Or you can test that with something like this (the first request takes a while to load the giant model into memory):
 
 ```python
 import requests
-response = requests.post("http://localhost:8000/embeddings/2d.json",
-                        data = {'words[]':['one', 'two', 'three'],
-                                'model':'GoogleNews-vectors-negative300.bin'})
+response = requests.post("http://localhost:8000/api/v2/google-news2d.json",
+                         data = {'words[]':['apples', 'bananas', 'three']})
 print response.json()
 ```
-
-Creating a Topic Model
-----------------------
-
-To create a model for a topic, run `python scripts/create-topic-model.py TOPIC_ID`.  That will save a model file into
-the `models` folder.
 
 Deploying
 ---------
@@ -56,11 +47,11 @@ This is configured to deploy as a Heroku buildpack to [dokku](http://dokku.viewd
 
 You'll need to do something like this to set the required environment variables:
 
-`dokku config:set word-embeddings SECRET_KEY=oiwajj243josadjoi SENTRY_DSN=https://THING1:THING2@sentry.io/THING3`
+`dokku config:set word-embeddings SECRET_KEY=oiwajj243josadjoi SENTRY_DSN=https://THING1:THING2@sentry.io/THING3 MEDIA_CLOUD_API_KEY=MY_AWESOME_KEY`
 
 Releasing
 ---------
 
 1. Update the semantic version number in `server/__init.py__`
-2. Tag the repository with that number, like `v1.0.1`
-3. Push it to the server, like `git push dokku master`
+2. Tag the repository with that number, like `v4.5.2`
+3. Push it to the server, like `git push dokku v4.5.2:master`
