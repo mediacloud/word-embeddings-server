@@ -1,13 +1,15 @@
 import os
 import logging.config
-import ConfigParser
 import sys
 from flask import Flask
 from raven.conf import setup_logging
 from raven.contrib.flask import Sentry
 from raven.handlers.logging import SentryHandler
+import mediacloud
 
-VERSION = "1.0.1"
+from config import get_default_config, ConfigException
+
+VERSION = "2.0.0"
 
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -15,50 +17,46 @@ base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 # load the settings
-server_config_file_path = os.path.join(base_dir, 'config', 'server.config')
-SENTRY_DSN = None
-SECRET_KEY = None
-LOG_LEVEL = 'WARN'
-if os.path.exists(server_config_file_path):
-    logging.info("Loading settings from config/server.config")
-    settings = ConfigParser.ConfigParser()
-    settings.read(server_config_file_path)
-    SENTRY_DSN = settings.get('sentry', 'dsn')
-    SECRET_KEY = settings.get('server', 'secret_key')
-else:
-    logging.info("Loading settings from environment variables")
-    try:
-        SENTRY_DSN = os.environ.get('SENTRY_DSN')   # it would do this by default, but let's be intentional about it
-        SECRET_KEY = os.environ.get('SECRET_KEY')
-        LOG_LEVEL = os.environ.get('LOG_LEVEL')
-    except KeyError:
-        logging.error("You need to define the SECRET_KEY environment variable")
-        sys.exit(0)
+config = get_default_config()
 
 # just log to stdout so it works well on prod containers
-logging.basicConfig(stream=sys.stdout, level=LOG_LEVEL)
+log_level = "WARN"
+try:
+    log_level = config.get("LOG_LEVEL")
+except ConfigException as ce:
+    logging.info("No log level set, defaulting to WARN")
+logging.basicConfig(stream=sys.stdout, level=log_level)
 
 logger = logging.getLogger(__name__)
 logger.info("---------------------------------------------------------------------------")
 
+# create Media Cloud api client for fetching model info and models themselves
+mc = mediacloud.api.MediaCloud(config.get("MEDIA_CLOUD_API_KEY"))
+
 # Set up sentry logging service
-if SENTRY_DSN:
-    handler = SentryHandler(SENTRY_DSN)
+sentry_dsn = None
+try:
+    sentry_dsn = config.get("SENTRY_DSN")
+except ConfigException as ce:
+    logging.warning(ce)
+if sentry_dsn and len(sentry_dsn) > 0:
+    handler = SentryHandler(sentry_dsn)
     setup_logging(handler)
 else:
-    logging.info("No sentry logging")
+    logger.info("No sentry logging")
 
 
 def create_app():
-    global SENTRY_DSN
+    global sentry_dsn
     # Factory method to create the app
     my_app = Flask(__name__)
-    my_app.secret_key = SECRET_KEY
-    if SENTRY_DSN:
-        Sentry(my_app, dsn=SENTRY_DSN)
+    my_app.secret_key = config.get('SECRET_KEY')
+    if sentry_dsn and len(sentry_dsn) > 0:
+        Sentry(my_app, dsn=sentry_dsn)
     return my_app
 
 app = create_app()
 
 # now load in the appropriate view endpoints, after the app has been initialized
-import server.views
+import server.views.website
+import server.views.api_v2

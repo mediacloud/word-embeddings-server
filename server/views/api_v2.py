@@ -1,34 +1,46 @@
-import logging
-from flask import request, jsonify, render_template
 import string
+import logging
+from flask import request, jsonify
 from sklearn.decomposition import PCA
 
 from server import app, VERSION
-from request import form_fields_required
-from models import get_model, model_name_list
+from server.request import form_fields_required
+from server.models import get_topic_model, get_google_news_model
 
 logger = logging.getLogger(__name__)
 
 
-@app.route('/', methods=['GET'])
-def model_list():
-    model_names = model_name_list()
-    return render_template('index.html', models=model_names)
-
-
-@app.route('/models.json', methods=['GET'])
-def model_list_json():
-    model_names = model_name_list()
-    return jsonify(model_names)
-
-
-@app.route('/embeddings/2d.json', methods=['POST'])
-@form_fields_required('words[]', 'model')
-def embeddings_2d():
-    word_vectors = get_model(request.form['model'])
+@app.route('/api/v2/google-news/2d', methods=['POST'])
+@form_fields_required('words[]')
+def google_embeddings_2d():
+    word_vectors = get_google_news_model()
     words = request.form.getlist('words[]')
-    words = [w for w in words if len(w) > 0]    # do a little extra cleanup - no empty words
+    results = _embeddings_2d(word_vectors, words)
+    return jsonify({
+        'results': results,
+        'version': VERSION
+    })
 
+
+@app.route('/api/v2/topics/{topics_id}/snapshots/{snapshots_id}/2d', methods=['POST'])
+@form_fields_required('words[]')
+def topic_embeddings_2d(topics_id, snapshots_id):
+    word_vectors = get_topic_model(topics_id, snapshots_id)
+    words = _words_from_form(request.form)
+    results = _embeddings_2d(word_vectors, words)
+    return jsonify({
+        'results': results,
+        'version': VERSION
+    })
+
+
+def _words_from_form(request_form):
+    words = request_form.getlist('words[]')
+    words = [w for w in words if len(w) > 0]
+    return words
+
+
+def _embeddings_2d(word_vectors, words):
     # Remove words that are not in model vocab
     words_in_model = []
     for word in words:
@@ -40,7 +52,6 @@ def embeddings_2d():
         except KeyError:
             # ignore words not in model
             pass
-
     # reduce to a 2d representation for charting purposes
     embeddings = [word_vectors[word] for word in [w['cleaned_word'] for w in words_in_model]]
     pca = PCA(n_components=2)
@@ -56,7 +67,6 @@ def embeddings_2d():
     else:
         for i in range(len(words_in_model)):
             words_with_model_info.append({'word': words_in_model[i]['word'], 'x': two_d_embeddings[i][0], 'y': two_d_embeddings[i][1]})
-
     results = []
     for word in words:
         word_model_data = next(iter([w for w in words_with_model_info if w["word"] == word]), None)
@@ -65,27 +75,41 @@ def embeddings_2d():
         else:
             results.append({'word': word, 'x': None, 'y': None})
 
+    return results
+
+
+@app.route('/api/v2/google-news/similar-words', methods=['POST'])
+@form_fields_required('words[]')
+def google_similar_words():
+    word_vectors = get_google_news_model()
+    words = request.form.getlist('words[]')
+    results = [{'word': w, 'results': _embeddings_similar_words(word_vectors, w)} for w in words]
     return jsonify({
         'results': results,
         'version': VERSION
     })
 
 
-@app.route('/embeddings/<word>/similar-words.json', methods=['GET'])
-def embeddings_similar_words(word):
-    word_vectors = get_model(request.args.get('model'))
+@app.route('/api/v2/topics/{topics_id}/snapshots/{snapshots_id}/similar-words', methods=['POST'])
+@form_fields_required('words[]')
+def topic_similar_words(topics_id, snapshots_id):
+    word_vectors = get_topic_model(topics_id, snapshots_id)
+    words = request.form.getlist('words[]')
+    results = [{'word': w, 'results': _embeddings_similar_words(word_vectors, w)} for w in words]
+    return jsonify({
+        'results': results,
+        'word': words[0],
+        'version': VERSION
+    })
+
+
+def _embeddings_similar_words(word_vectors, word):
     try:
         similar_words = word_vectors.most_similar(word)
     except KeyError:
         # means the word is not in the vocabulary we are using
         similar_words = []
-
     results = []
     for sim_word in similar_words:
         results.append({'word': sim_word[0], 'score': sim_word[1]})
-
-    return jsonify({
-        'results': results,
-        'word': word,
-        'version': VERSION
-    })
+    return results

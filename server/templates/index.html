@@ -21,7 +21,7 @@
 
         <div class="row">
             <div class="col-md-12">
-                <h1>Media Cloud Word Embeddings Server</h1>
+                <h1>Media Cloud Word Embeddings Server v{{ version }}</h1>
             </div>
         </div>
 
@@ -31,12 +31,10 @@
                 <h2>Input</h2>
                 <form name="2dEmbeddings">
                   <div class="form-group">
-                    <label for="model">Model</label>
-                    <select id="model" name="model" class="form-control">
-                        {%  for model in models %}
-                            <option>{{ model }}</option>
-                        {%  endfor %}
-                    </select>
+                    <label for="topicId">Topic Id</label>
+                    <input type="number" id="topicId">
+                    <label for="snapshotId">Snapshot Id</label>
+                    <input type="number" id="snapshotId">
                   </div>
                   <div class="form-group">
                     <label for="words">Words</label>
@@ -60,10 +58,10 @@
     <script type="text/javascript">
 
         function getData(){
-            var model = $('#model').val();
+            var topicId = $('#topicId').val();
+            var snapshotId = $('#snapshotId').val();
             var words = $('#words').val().split(/\r?\n/);
-            console.log(words);
-            var data = {'model': model, 'words': words};
+            var data = {'topicId': topicId, 'snapshotId': snapshotId, 'words': words};
             return data;
         }
 
@@ -71,14 +69,30 @@
             $('#results').html(JSON.stringify(results, null, 2));
         }
 
+        function getTopicBaseUrl(data){
+            var url = 'api/v2/';
+            if((parseInt(data.topicId, 10) > 0) && (parseInt(data.snapshotId, 10) > 0)) {
+                url += 'topics/' + data.topicId;
+                url += 'snapshots/' + data.snapshotId;
+            } else {
+                url += 'google-news/';
+            }
+            return url;
+        }
+
         $('#2dPositionsButton').click(function() {
-            $.post('/embeddings/2d.json', getData())
+            var data = getData();
+            var url = getTopicBaseUrl(data);
+            url += '2d';
+            $.post(url, data)
                 .done(handleResults);
         });
 
         $('#similarWords').click(function() {
             var data = getData();
-            $.get('/embeddings/'+data.words[0]+'/similar-words.json?model='+data['model'])
+            var url = getTopicBaseUrl(data);
+            url += 'similar-words';
+            $.post(url, data)
                 .done(handleResults);
         });
 

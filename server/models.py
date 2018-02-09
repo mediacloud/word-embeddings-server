@@ -2,42 +2,58 @@ import logging
 import os
 import gensim
 
-from server import base_dir
+from server import base_dir, mc
 
 MODEL_DIR = "models"
 
-MODEL_GOOGLE_NEWS = "GoogleNews-vectors-negative300.bin"
-MODEL_GOOGLE_NEWS_SHORTNAME = "GoogleNews-vectors-negative300"
+GOOGLE_NEWS_MODEL_FILENAME = "GoogleNews-vectors-negative300.bin"
 
 logger = logging.getLogger(__name__)
 
 model_cache = {}  # keyed by model name
 
-
-def model_name_list():
-    all_files = [f for f in os.listdir(MODEL_DIR) if not f.startswith('.')]
-    files = []
-    for f in all_files:
-        if '.' in f:
-            files.append(f[:f.index('.')])
-        else:
-            files.append(f)
-    return list(set(files))
+google_model = None
 
 
-class UnknownModelException(Exception):
-    pass
+def get_google_news_model():
+    global google_model
+    if google_model is None:
+        model_filename = GOOGLE_NEWS_MODEL_FILENAME
+        google_model = _load_model_from_file(model_filename)
+    return google_model
 
 
-def get_model(name):
-    if name == MODEL_GOOGLE_NEWS_SHORTNAME:
-        return _load_model(MODEL_GOOGLE_NEWS)
-    if name in model_name_list():
-        return _load_model(name)
-    raise UnknownModelException(name)
+def _topic_model_cache_name(topics_id, snapshots_id):
+    return "topic-{}-snapshot-{}".format(topics_id, snapshots_id)
 
 
-def _load_model(name):
+def _is_topic_model_cached(topics_id, snapshots_id):
+    name = _topic_model_cache_name(topics_id, snapshots_id)
+    return name in model_cache
+
+
+def _cache_topic_model(topics_id, snapshots_id, model):
+    name = _topic_model_cache_name(topics_id, snapshots_id)
+    model_cache[name] = model
+
+
+def _get_cached_model(topics_id, snapshots_id):
+    name = _topic_model_cache_name(topics_id, snapshots_id)
+    return model_cache[name]
+
+
+def get_topic_model(topics_id=None, snapshots_id=None):
+    if not _is_topic_model_cached(topics_id, snapshots_id):
+        all_snapshots = mc.topicSnapshotList(topics_id)
+        snapshot = [s for s in all_snapshots if s['snapshots_id'] == snapshots_id][0]
+        model_info = snapshot['word2vec_models'][0]
+        model = mc.topicSnapshotWord2VecModel(topics_id, snapshots_id, model_info['models_id'])
+        # TODO: save to file from raw octect stream
+        _cache_topic_model(topics_id, snapshots_id, model)
+    return _get_cached_model(topics_id, snapshots_id)
+
+
+def _load_model_from_file(name):
     if name not in model_cache:
         logger.info("Loading pre-trained word to vec model named {}...".format(name))
         path_to_model = _path_to_model(name)
