@@ -1,7 +1,6 @@
 Flask==0.12.2
 gensim==2.2.0
-scikit-learn==0.18.2
 raven==6.1.0
 gunicorn==19.7.1
 blinker
-mediacloud
+mediacloud==2.51.0
