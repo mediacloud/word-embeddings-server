@@ -36,6 +36,7 @@ except ConfigException as ce:
     logging.warning(ce)
 if sentry_dsn and len(sentry_dsn) > 0:
     handler = SentryHandler(sentry_dsn)
+    handler.setLevel(logging.ERROR)
     setup_logging(handler)
 else:
     logger.info("No sentry logging")
