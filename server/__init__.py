@@ -9,7 +9,7 @@ import mediacloud
 
 from config import get_default_config, ConfigException
 
-VERSION = "2.0.0"
+VERSION = "2.1.0"
 
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -59,4 +59,4 @@ app = create_app()
 
 # now load in the appropriate view endpoints, after the app has been initialized
 import server.views.website
-import server.views.api_v2
+import server.views.api
