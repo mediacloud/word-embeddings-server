@@ -22,10 +22,15 @@ def google_embeddings_2d():
     })
 
 
-@app.route('/api/v2/topics/{topics_id}/snapshots/{snapshots_id}/2d', methods=['POST'])
+@app.route('/api/v2/topics/<topics_id>/snapshots/<snapshots_id>/2d', methods=['POST'])
 @form_fields_required('words[]')
 def topic_embeddings_2d(topics_id, snapshots_id):
     word_vectors = get_topic_model(topics_id, snapshots_id)
+    if word_vectors is None:
+        return jsonify({
+            'error': "There is no data for this topic",
+            'version': VERSION
+        })
     words = _words_from_form(request.form)
     results = _embeddings_2d(word_vectors, words)
     return jsonify({
@@ -90,10 +95,15 @@ def google_similar_words():
     })
 
 
-@app.route('/api/v2/topics/{topics_id}/snapshots/{snapshots_id}/similar-words', methods=['POST'])
+@app.route('/api/v2/topics/<topics_id>/snapshots/<snapshots_id>/similar-words', methods=['POST'])
 @form_fields_required('words[]')
 def topic_similar_words(topics_id, snapshots_id):
     word_vectors = get_topic_model(topics_id, snapshots_id)
+    if word_vectors is None:
+        return jsonify({
+            'error': "There is no data for this topic",
+            'version': VERSION
+        })
     words = request.form.getlist('words[]')
     results = [{'word': w, 'results': _embeddings_similar_words(word_vectors, w)} for w in words]
     return jsonify({

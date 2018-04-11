@@ -1,6 +1,6 @@
 import os
 import logging.config
-import sys
+import json
 from flask import Flask
 from raven.conf import setup_logging
 from raven.contrib.flask import Sentry
@@ -13,20 +13,15 @@ VERSION = "2.1.0"
 
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# just log to stdout so it works well on prod containers
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-
 # load the settings
 config = get_default_config()
 
-# just log to stdout so it works well on prod containers
-log_level = "WARN"
-try:
-    log_level = config.get("LOG_LEVEL")
-except ConfigException as ce:
-    logging.info("No log level set, defaulting to WARN")
-logging.basicConfig(stream=sys.stdout, level=log_level)
-
+# setup logging
+with open(os.path.join(base_dir, 'config', 'logging.json'), 'r') as f:
+    logging_config = json.load(f)
+    logging_config['handlers']['file']['filename'] = os.path.join(base_dir,
+                                                                  logging_config['handlers']['file']['filename'])
+    logging.config.dictConfig(logging_config)
 logger = logging.getLogger(__name__)
 logger.info("---------------------------------------------------------------------------")
 

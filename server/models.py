@@ -29,12 +29,27 @@ def _topic_model_cache_name(topics_id, snapshots_id):
 
 def _is_topic_model_cached(topics_id, snapshots_id):
     name = _topic_model_cache_name(topics_id, snapshots_id)
-    return name in model_cache
+    if name not in model_cache:
+        # not in memory, but might be on disk
+        file_path = os.path.join(base_dir, MODEL_DIR, name)
+        if os.path.exists(file_path):
+            model_cache[name] = gensim.models.keyedvectors.KeyedVectors.load(file_path)
+            return True
+        return False
+    return True
 
 
 def _cache_topic_model(topics_id, snapshots_id, model):
     name = _topic_model_cache_name(topics_id, snapshots_id)
-    model_cache[name] = model
+    # and write it to disk here too
+    model_byte_array = bytearray(model)
+    model_name = _topic_model_cache_name(topics_id, snapshots_id)
+    path_to_model = os.path.join(base_dir, MODEL_DIR, model_name)
+    cache_file = open(path_to_model, 'w')
+    cache_file.write(model_byte_array)
+    cache_file.close()
+    # load it into memory
+    model_cache[name] = _load_model_from_file(model_name)
 
 
 def _get_cached_model(topics_id, snapshots_id):
@@ -45,11 +60,13 @@ def _get_cached_model(topics_id, snapshots_id):
 def get_topic_model(topics_id=None, snapshots_id=None):
     if not _is_topic_model_cached(topics_id, snapshots_id):
         all_snapshots = mc.topicSnapshotList(topics_id)
-        snapshot = [s for s in all_snapshots if s['snapshots_id'] == snapshots_id][0]
+        snapshot = [s for s in all_snapshots if s['snapshots_id'] == int(snapshots_id)][0]
+        if len(snapshot['word2vec_models']) is 0:
+            # there no snapshots for this model
+            return None
         model_info = snapshot['word2vec_models'][0]
-        model = mc.topicSnapshotWord2VecModel(topics_id, snapshots_id, model_info['models_id'])
-        # TODO: save to file from raw octect stream
-        _cache_topic_model(topics_id, snapshots_id, model)
+        raw_model = mc.topicSnapshotWord2VecModel(topics_id, snapshots_id, model_info['models_id'])
+        _cache_topic_model(topics_id, snapshots_id, raw_model)
     return _get_cached_model(topics_id, snapshots_id)
 
 

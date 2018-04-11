@@ -32,9 +32,9 @@
                 <form name="2dEmbeddings">
                   <div class="form-group">
                     <label for="topicId">Topic Id</label>
-                    <input type="number" id="topicId">
+                    <input type="number" id="topicId" value="1636">
                     <label for="snapshotId">Snapshot Id</label>
-                    <input type="number" id="snapshotId">
+                    <input type="number" id="snapshotId" value="2045">
                   </div>
                   <div class="form-group">
                     <label for="words">Words</label>
@@ -61,7 +61,7 @@
             var topicId = $('#topicId').val();
             var snapshotId = $('#snapshotId').val();
             var words = $('#words').val().split(/\r?\n/);
-            var data = {'topicId': topicId, 'snapshotId': snapshotId, 'words': words};
+            var data = {'topicId': topicId, 'snapshotId': snapshotId, 'words[]': words};
             return data;
         }
 
@@ -73,7 +73,7 @@
             var url = 'api/v2/';
             if((parseInt(data.topicId, 10) > 0) && (parseInt(data.snapshotId, 10) > 0)) {
                 url += 'topics/' + data.topicId;
-                url += 'snapshots/' + data.snapshotId;
+                url += '/snapshots/' + data.snapshotId + '/';
             } else {
                 url += 'google-news/';
             }

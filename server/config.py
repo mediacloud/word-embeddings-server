@@ -57,7 +57,7 @@ class EnvOrFileBasedConfig(object):
 
 
 def get_default_config():
-    base_dir = os.path.dirname(os.path.dirname(os.path.dirname((os.path.abspath(__file__)))))
+    base_dir = os.path.dirname(os.path.dirname((os.path.abspath(__file__))))
     path_to_config_file = os.path.join(base_dir, u'config', u'app.config')
     config = EnvOrFileBasedConfig(path_to_config_file)
     return config

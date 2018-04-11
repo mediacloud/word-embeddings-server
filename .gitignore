@@ -7,3 +7,4 @@ config/server.config
 set-env-vars.sh
 models/*
 venv
+config/app.config
