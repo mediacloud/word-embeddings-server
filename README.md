@@ -20,7 +20,7 @@ Developing
 
 We develop [with PyCharm](https://www.jetbrains.com/pycharm/).
 
-Copy the `config/server.config.template` to `config/server.config` and fill in the values.
+Copy the `config/app.config.template` to `config/app.config` and fill in the values.
 
 Running
 -------
