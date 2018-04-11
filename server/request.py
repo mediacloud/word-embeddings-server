@@ -21,9 +21,7 @@ def validate_params_exist(form, params):
 
 
 def form_fields_required(*expected_form_fields):
-    '''
-    Handy decorator for ensuring that the form has the fields you need
-    '''
+    # Handy decorator for ensuring that the form has the fields you need
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
