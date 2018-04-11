@@ -10,7 +10,7 @@ from server.models import get_topic_model, get_google_news_model
 logger = logging.getLogger(__name__)
 
 
-@app.route('/embeddings/2d.json', method=['POST'])
+@app.route('/embeddings/2d.json', methods=['POST'])
 def google_embeddings_2d_deprecated():
     return google_embeddings_2d()
 
