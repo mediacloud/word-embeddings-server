@@ -10,6 +10,11 @@ from server.models import get_topic_model, get_google_news_model
 logger = logging.getLogger(__name__)
 
 
+@app.route('/embeddings/2d.json', method=['POST'])
+def google_embeddings_2d_deprecated():
+    return google_embeddings_2d()
+
+
 @app.route('/api/v2/google-news/2d', methods=['POST'])
 @form_fields_required('words[]')
 def google_embeddings_2d():
