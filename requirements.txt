@@ -1,7 +1,7 @@
-Flask==0.12.2
+Flask==1.0.2
 gensim==3.5.0
 scikit-learn==0.18.2
-raven==6.1.0
-gunicorn==19.7.1
-blinker
-mediacloud==2.52.0
+raven==6.9.0
+gunicorn==19.9.0
+blinker==1.4
+mediacloud==3.2.1
