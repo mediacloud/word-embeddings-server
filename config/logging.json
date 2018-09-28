@@ -15,24 +15,15 @@
       "class": "logging.StreamHandler",
       "formatter": "detailed",
       "stream": "ext://sys.stdout"
-    },
-    "file": {
-      "level": "DEBUG",
-      "class": "logging.handlers.RotatingFileHandler",
-      "encoding": "utf8",
-      "formatter": "detailed",
-      "filename": "logs/server.log",
-      "maxBytes": 10485760,
-      "backupCount": 10
     }
   },
 
   "loggers": {
     "": {
-      "handlers": ["file", "console"],
+      "handlers": ["console"],
       "propagate": false
     },
-    "mediacloud": {
+    "server": {
       "level": "DEBUG",
       "propagate": true
     },
