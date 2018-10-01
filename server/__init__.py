@@ -9,7 +9,7 @@ import mediacloud
 
 from config import get_default_config, ConfigException
 
-VERSION = "2.2.0"
+VERSION = "2.2.1"
 
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
