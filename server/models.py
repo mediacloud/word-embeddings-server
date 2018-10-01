@@ -33,10 +33,20 @@ def _is_topic_model_cached(topics_id, snapshots_id):
         # not in memory, but might be on disk
         file_path = os.path.join(base_dir, MODEL_DIR, name)
         if os.path.exists(file_path):
-            model_cache[name] = gensim.models.keyedvectors.KeyedVectors.load(file_path)
+            # if the file exists, make sure it isn't in an old format (which throws an Attribute error about not
+            # having EuclideanKeyedVectors)
+            try:
+                model_cache[name] = gensim.models.keyedvectors.KeyedVectors.load(file_path)
+            except AttributeError:
+                _remove_topic_model(file_path)
+                return False    # let the requester try and fetch the model again, cause we don't have a good version of it
             return True
         return False
     return True
+
+
+def _remove_topic_model(file_path):
+    os.remove(file_path)
 
 
 def _cache_topic_model(topics_id, snapshots_id, model):
@@ -60,10 +70,14 @@ def _get_cached_model(topics_id, snapshots_id):
 def get_topic_model(topics_id=None, snapshots_id=None):
     if not _is_topic_model_cached(topics_id, snapshots_id):
         all_snapshots = mc.topicSnapshotList(topics_id)
-        snapshot = [s for s in all_snapshots if s['snapshots_id'] == int(snapshots_id)][0]
+        if len(all_snapshots) is 0:
+            raise RuntimeError('No snapshots for topic {}'.format(topics_id))
+        snapshot = [s for s in all_snapshots if s['snapshots_id'] == int(snapshots_id)]
+        if len(snapshot) is 0:
+            raise RuntimeError('No snapshot {} in topic {}'.format(snapshots_id, topics_id))
+        snapshot = snapshot[0]
         if len(snapshot['word2vec_models']) is 0:
-            # there no snapshots for this model
-            return None
+            raise RuntimeError('No word2ve models for topic {}/{}'.format(topics_id, snapshots_id))
         model_info = snapshot['word2vec_models'][0]
         raw_model = mc.topicSnapshotWord2VecModel(topics_id, snapshots_id, model_info['models_id'])
         _cache_topic_model(topics_id, snapshots_id, raw_model)
@@ -74,10 +88,18 @@ def _load_model_from_file(name):
     if name not in model_cache:
         logger.info("Loading pre-trained word to vec model named {}...".format(name))
         path_to_model = _path_to_model(name)
-        if name.endswith('.bin'):  # the google one was trained in C and saved as a binary
+        try:
+            # Try loading "new-style" C format model (the google news ones is in this format, as are the newer
+            # ones we generate)
             model = gensim.models.keyedvectors.KeyedVectors.load_word2vec_format(path_to_model, binary=True)
-        else:  # our models are saved with a call to save, so use `load` to load them
-            model = gensim.models.keyedvectors.KeyedVectors.load(path_to_model)
+        except Exception as ex:
+            # Try loading "old-style" pickled model
+            try:
+                model = gensim.models.keyedvectors.KeyedVectors.load(path_to_model)
+            except AttributeError as ae:
+                # it is in a bad format that we can't use
+                logger.warning("Model {} is in an older format that we don't support".format(name))
+                raise ae
         logger.info("  loaded")
         model_cache[name] = model
     return model_cache[name]
