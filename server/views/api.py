@@ -30,18 +30,21 @@ def google_embeddings_2d():
 @app.route('/api/v2/topics/<topics_id>/snapshots/<snapshots_id>/2d', methods=['POST'])
 @form_fields_required('words[]')
 def topic_embeddings_2d(topics_id, snapshots_id):
-    word_vectors = get_topic_model(topics_id, snapshots_id)
-    if word_vectors is None:
+    try:
+        word_vectors = get_topic_model(topics_id, snapshots_id)
+        words = _words_from_form(request.form)
+        results = _embeddings_2d(word_vectors, words)
         return jsonify({
-            'error': "There is no data for this topic",
+            'results': results,
             'version': VERSION
         })
-    words = _words_from_form(request.form)
-    results = _embeddings_2d(word_vectors, words)
-    return jsonify({
-        'results': results,
-        'version': VERSION
-    })
+    except Exception as e:
+        # probably an older format model, but who knows what could happen so lets handle it
+        logger.warning("Couldn't load model for {}/{}".format(topics_id, snapshots_id))
+        return jsonify({
+            'error': "Can't load model: {}".format(e),
+            'version': VERSION
+        })
 
 
 def _words_from_form(request_form):
@@ -103,19 +106,22 @@ def google_similar_words():
 @app.route('/api/v2/topics/<topics_id>/snapshots/<snapshots_id>/similar-words', methods=['POST'])
 @form_fields_required('words[]')
 def topic_similar_words(topics_id, snapshots_id):
-    word_vectors = get_topic_model(topics_id, snapshots_id)
-    if word_vectors is None:
+    try:
+        word_vectors = get_topic_model(topics_id, snapshots_id)
+        words = request.form.getlist('words[]')
+        results = [{'word': w, 'results': _embeddings_similar_words(word_vectors, w)} for w in words]
         return jsonify({
-            'error': "There is no data for this topic",
+            'results': results,
+            'word': words[0],
             'version': VERSION
         })
-    words = request.form.getlist('words[]')
-    results = [{'word': w, 'results': _embeddings_similar_words(word_vectors, w)} for w in words]
-    return jsonify({
-        'results': results,
-        'word': words[0],
-        'version': VERSION
-    })
+    except Exception as e:
+        # probably an older format model, but who knows what could happen so lets handle it
+        logger.warning("Couldn't load model for {}/{}".format(topics_id, snapshots_id))
+        return jsonify({
+            'error': "Can't load model: {}".format(e),
+            'version': VERSION
+        })
 
 
 def _embeddings_similar_words(word_vectors, word):
