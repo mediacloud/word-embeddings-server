@@ -28,6 +28,7 @@ def _topic_model_cache_name(topics_id, snapshots_id):
 
 
 def _is_topic_model_cached(topics_id, snapshots_id):
+    # this tries to be smart about checking for it in memory, or from the directory if it is'nt in memory already
     name = _topic_model_cache_name(topics_id, snapshots_id)
     if name not in model_cache:
         # not in memory, but might be on disk
@@ -36,12 +37,17 @@ def _is_topic_model_cached(topics_id, snapshots_id):
             # if the file exists, make sure it isn't in an old format (which throws an Attribute error about not
             # having EuclideanKeyedVectors)
             try:
-                model_cache[name] = gensim.models.keyedvectors.KeyedVectors.load(file_path)
-            except AttributeError:
+                model_cache[name] = gensim.models.keyedvectors.KeyedVectors.load_word2vec_format(file_path, binary=True)
+            except Exception as ex:
+                logger.warning("Unable to load model into cache from {}".format(file_path))
                 _remove_topic_model(file_path)
-                return False    # let the requester try and fetch the model again, cause we don't have a good version of it
+                # let the requester try and fetch the model again, cause we don't have a good version of it
+                return False
+            # found it on disk and loaded it into memory
             return True
+        # not in memory and not on disk
         return False
+    # exists in model cache in memory
     return True
 
 
@@ -89,17 +95,11 @@ def _load_model_from_file(name):
         logger.info("Loading pre-trained word to vec model named {}...".format(name))
         path_to_model = _path_to_model(name)
         try:
-            # Try loading "new-style" C format model (the google news ones is in this format, as are the newer
-            # ones we generate)
+            # The google news ones is in this C-style binary format, as are the ones we generate
             model = gensim.models.keyedvectors.KeyedVectors.load_word2vec_format(path_to_model, binary=True)
         except Exception as ex:
-            # Try loading "old-style" pickled model
-            try:
-                model = gensim.models.keyedvectors.KeyedVectors.load(path_to_model)
-            except AttributeError as ae:
-                # it is in a bad format that we can't use
-                logger.warning("Model {} is in an older format that we don't support".format(name))
-                raise ae
+            logger.warning("Unable to load model {}".format(name))
+            raise ex
         logger.info("  loaded")
         model_cache[name] = model
     return model_cache[name]

@@ -40,6 +40,7 @@ def topic_embeddings_2d(topics_id, snapshots_id):
         })
     except Exception as e:
         # probably an older format model, but who knows what could happen so lets handle it
+        logger.exception(e)
         logger.warning("Couldn't load model for {}/{}".format(topics_id, snapshots_id))
         return jsonify({
             'error': "Can't load model: {}".format(e),
