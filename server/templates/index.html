@@ -28,7 +28,7 @@
         <div class="row">
             <div class="col-md-6">
 
-                <h2>Input</h2>
+                <h2>Input <small>( use 0/0 for GoogleNews model )</small></h2>
                 <form name="2dEmbeddings">
                   <div class="form-group">
                     <label for="topicId">Topic Id</label>
@@ -67,6 +67,7 @@
 
         function handleResults(results){
             $('#results').html(JSON.stringify(results, null, 2));
+            $('button').prop('disabled', false);
         }
 
         function getTopicBaseUrl(data){
@@ -81,17 +82,17 @@
         }
 
         $('#2dPositionsButton').click(function() {
+            $('button').prop('disabled', true);
             var data = getData();
-            var url = getTopicBaseUrl(data);
-            url += '2d';
+            var url = getTopicBaseUrl(data) + '2d';
             $.post(url, data)
                 .done(handleResults);
         });
 
         $('#similarWords').click(function() {
+            $('button').prop('disabled', true);
             var data = getData();
-            var url = getTopicBaseUrl(data);
-            url += 'similar-words';
+            var url = getTopicBaseUrl(data) + 'similar-words';
             $.post(url, data)
                 .done(handleResults);
         });
