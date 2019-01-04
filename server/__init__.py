@@ -7,14 +7,9 @@ from raven.contrib.flask import Sentry
 from raven.handlers.logging import SentryHandler
 import mediacloud
 
-from config import get_default_config, ConfigException
-
-VERSION = "2.2.2"
+VERSION = "2.3.0"
 
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-# load the settings
-config = get_default_config()
 
 # setup logging
 with open(os.path.join(base_dir, 'config', 'logging.json'), 'r') as f:
@@ -24,14 +19,10 @@ logger = logging.getLogger(__name__)
 logger.info("---------------------------------------------------------------------------")
 
 # create Media Cloud api client for fetching model info and models themselves
-mc = mediacloud.api.MediaCloud(config.get("MEDIA_CLOUD_API_KEY"))
+mc = mediacloud.api.MediaCloud(os.getenv("MEDIA_CLOUD_API_KEY"))
 
 # Set up sentry logging service
-sentry_dsn = None
-try:
-    sentry_dsn = config.get("SENTRY_DSN")
-except ConfigException as ce:
-    logging.warning(ce)
+sentry_dsn = os.getenv('SENTRY_DSN')
 if sentry_dsn and len(sentry_dsn) > 0:
     handler = SentryHandler(sentry_dsn)
     handler.setLevel(logging.ERROR)
@@ -44,7 +35,7 @@ def create_app():
     global sentry_dsn
     # Factory method to create the app
     my_app = Flask(__name__)
-    my_app.secret_key = config.get('SECRET_KEY')
+    my_app.secret_key = os.getenv('SECRET_KEY')
     if sentry_dsn and len(sentry_dsn) > 0:
         Sentry(my_app, dsn=sentry_dsn)
     return my_app

@@ -6,4 +6,5 @@ gunicorn==19.9.0
 blinker==1.4
 mediacloud==3.2.1
 requests==2.19.1
+python-dotenv
 

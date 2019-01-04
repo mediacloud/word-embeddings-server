@@ -6,21 +6,22 @@ A micro-service to support analyzing words based on models of word embeddings (a
 Dev Installation
 ----------------
 
- * python 2.7 https://www.python.org/download/releases/2.7/
- * `pip install virtualenv` (if necessary) [also install/link pip if you don't have it (if on Mac OS, use sudo easy_install pip)]
- * [`virtualenv venv`](https://virtualenv.pypa.io/en/stable/)
- * activate your virtualenv (and not run any global python installations)
-   * on OSX: `source venv/bin/activate`
-   * on Windows: `call venv\Scripts\activate`
- * run `pip install -r requirements.txt` to install dependencies
- * run `python download-google-news-model.py` to download the google news model file
+1. Install python 3.6.5.
+2. Run `pip install -r requirements.txt` to install dependencies
+3. Run `python download-google-news-model.py` to download the google news model file.
  
 Developing
 ----------
 
 We develop [with PyCharm](https://www.jetbrains.com/pycharm/).
 
-Copy the `config/app.config.template` to `config/app.config` and fill in the values.
+Configuration happens via environment variables. We use `python-dotenv` to manage this on locall dev
+machines. Make a `.env` file and define the following in it:
+  * SENTRY_DSN - optional url for Sentry logging
+  * SECRET_KEY - for Flask
+  * LOG_LEVEL - DEBUG, INFO, etc.
+  * MEDIA_CLOUD_API_KEY - your Media Cloud API key
+
 
 Running
 -------
