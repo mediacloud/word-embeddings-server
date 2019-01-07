@@ -1,5 +1,4 @@
 .idea
-venv
 logs/*.log
 server/__init__.pyc
 *.pyc
@@ -7,4 +6,5 @@ config/server.config
 set-env-vars.sh
 models/*
 venv
+.env
 config/app.config
