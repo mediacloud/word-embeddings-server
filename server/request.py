@@ -1,6 +1,7 @@
 import logging
-from flask import request, jsonify
 from functools import wraps
+
+from flask import request, jsonify
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ def json_error_response(message, status_code=400):
 def validate_params_exist(form, params):
     for param in params:
         if param not in form:
-            raise ValueError('Missing required value for '+param)
+            raise ValueError('Missing required value for ' + param)
 
 
 def form_fields_required(*expected_form_fields):
@@ -32,5 +33,7 @@ def form_fields_required(*expected_form_fields):
             except ValueError as e:
                 logger.exception("Missing a required form field")
                 return json_error_response(e.args[0])
+
         return wrapper
+
     return decorator

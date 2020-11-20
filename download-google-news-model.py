@@ -19,6 +19,7 @@ def download_file(url, destination_file):
     with open(destination_file, 'wb') as f:
         shutil.copyfileobj(r.raw, f)
 
+
 if not os.path.isfile(path_to_model_file):
     print "Google word2vec model not found, downloading model file from the cloud..."
     download_file(MODEL_GOOGLE_NEWS_URL, path_to_model_file)

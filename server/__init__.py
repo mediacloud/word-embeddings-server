@@ -1,6 +1,7 @@
 import os
 import logging.config
 import json
+
 from flask import Flask
 from raven.conf import setup_logging
 from raven.contrib.flask import Sentry
@@ -39,6 +40,7 @@ def create_app():
     if sentry_dsn and len(sentry_dsn) > 0:
         Sentry(my_app, dsn=sentry_dsn)
     return my_app
+
 
 app = create_app()
 

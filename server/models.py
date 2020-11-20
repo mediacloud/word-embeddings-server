@@ -1,5 +1,6 @@
 import logging
 import os
+
 import gensim
 
 from server import base_dir, mc
@@ -39,7 +40,7 @@ def _is_topic_model_cached(topics_id, snapshots_id):
             try:
                 model_cache[name] = gensim.models.keyedvectors.KeyedVectors.load_word2vec_format(file_path, binary=True)
             except Exception as ex:
-                logger.warning("Unable to load model into cache from {}".format(file_path))
+                logger.warning("Unable to load model into cache from {}: {}".format(file_path, str(ex)))
                 _remove_topic_model(file_path)
                 # let the requester try and fetch the model again, cause we don't have a good version of it
                 return False

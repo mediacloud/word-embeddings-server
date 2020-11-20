@@ -16,6 +16,5 @@ test_env = os.path.join(basedir, '.env')
 if os.path.isfile(test_env):
     load_dotenv(dotenv_path=os.path.join(basedir, '.env'), verbose=True)
 
-
 if __name__ == '__main__':
     run_simple('localhost', 8001, app, use_reloader=True, use_debugger=True)

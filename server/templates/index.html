@@ -9,95 +9,100 @@
     <title>Word Embeddings Server | Media Cloud</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+          integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
 
 </head>
 
 <body>
 
-    <div class="container">
+<div class="container">
 
-        <div class="row">
-            <div class="col-md-12">
-                <h1>Media Cloud Word Embeddings Server v{{ version }}</h1>
-            </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Media Cloud Word Embeddings Server v{{ version }}</h1>
         </div>
+    </div>
 
-        <div class="row">
-            <div class="col-md-6">
+    <div class="row">
+        <div class="col-md-6">
 
-                <h2>Input <small>( use 0/0 for GoogleNews model )</small></h2>
-                <form name="2dEmbeddings">
-                  <div class="form-group">
+            <h2>Input <small>( use 0/0 for GoogleNews model )</small></h2>
+            <form name="2dEmbeddings">
+                <div class="form-group">
                     <label for="topicId">Topic Id</label>
                     <input type="number" id="topicId" value="1636">
                     <label for="snapshotId">Snapshot Id</label>
                     <input type="number" id="snapshotId" value="2045">
-                  </div>
-                  <div class="form-group">
+                </div>
+                <div class="form-group">
                     <label for="words">Words</label>
-                    <textarea id="words" class="form-control" name="words" rows="10" placeholder="One word per line"></textarea>
-                  </div>
-                  <button id="2dPositionsButton" type="button" class="btn btn-default">2d Positions</button>
-                  <button id="similarWords" type="button" class="btn btn-default">Similar Words</button>
-                </form>
+                    <textarea id="words" class="form-control" name="words" rows="10"
+                              placeholder="One word per line"></textarea>
+                </div>
+                <button id="2dPositionsButton" type="button" class="btn btn-default">2d Positions</button>
+                <button id="similarWords" type="button" class="btn btn-default">Similar Words</button>
+            </form>
 
-            </div>
-            <div class="col-md-6">
-
-                <h2>Results</h2>
-                <pre id="results"></pre>
-
-            </div>
         </div>
+        <div class="col-md-6">
 
+            <h2>Results</h2>
+            <pre id="results"></pre>
+
+        </div>
     </div>
 
-    <script type="text/javascript">
+</div>
 
-        function getData(){
-            var topicId = $('#topicId').val();
-            var snapshotId = $('#snapshotId').val();
-            var words = $('#words').val().split(/\r?\n/);
-            var data = {'topicId': topicId, 'snapshotId': snapshotId, 'words[]': words};
-            return data;
+<script type="text/javascript">
+
+    function getData() {
+        var topicId = $('#topicId').val();
+        var snapshotId = $('#snapshotId').val();
+        var words = $('#words').val().split(/\r?\n/);
+        var data = {'topicId': topicId, 'snapshotId': snapshotId, 'words[]': words};
+        return data;
+    }
+
+    function handleResults(results) {
+        $('#results').html(JSON.stringify(results, null, 2));
+        $('button').prop('disabled', false);
+    }
+
+    function getTopicBaseUrl(data) {
+        var url = 'api/v2/';
+        if ((parseInt(data.topicId, 10) > 0) && (parseInt(data.snapshotId, 10) > 0)) {
+            url += 'topics/' + data.topicId;
+            url += '/snapshots/' + data.snapshotId + '/';
+        } else {
+            url += 'google-news/';
         }
+        return url;
+    }
 
-        function handleResults(results){
-            $('#results').html(JSON.stringify(results, null, 2));
-            $('button').prop('disabled', false);
-        }
+    $('#2dPositionsButton').click(function () {
+        $('button').prop('disabled', true);
+        var data = getData();
+        var url = getTopicBaseUrl(data) + '2d';
+        $.post(url, data)
+            .done(handleResults);
+    });
 
-        function getTopicBaseUrl(data){
-            var url = 'api/v2/';
-            if((parseInt(data.topicId, 10) > 0) && (parseInt(data.snapshotId, 10) > 0)) {
-                url += 'topics/' + data.topicId;
-                url += '/snapshots/' + data.snapshotId + '/';
-            } else {
-                url += 'google-news/';
-            }
-            return url;
-        }
+    $('#similarWords').click(function () {
+        $('button').prop('disabled', true);
+        var data = getData();
+        var url = getTopicBaseUrl(data) + 'similar-words';
+        $.post(url, data)
+            .done(handleResults);
+    });
 
-        $('#2dPositionsButton').click(function() {
-            $('button').prop('disabled', true);
-            var data = getData();
-            var url = getTopicBaseUrl(data) + '2d';
-            $.post(url, data)
-                .done(handleResults);
-        });
-
-        $('#similarWords').click(function() {
-            $('button').prop('disabled', true);
-            var data = getData();
-            var url = getTopicBaseUrl(data) + 'similar-words';
-            $.post(url, data)
-                .done(handleResults);
-        });
-
-    </script>
+</script>
 
 </body>
 

@@ -1,4 +1,5 @@
 import logging
+
 from flask import render_template
 
 from server import app, VERSION

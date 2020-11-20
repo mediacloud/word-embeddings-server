@@ -1,5 +1,6 @@
 import string
 import logging
+
 from flask import request, jsonify
 from sklearn.decomposition import PCA
 
@@ -80,7 +81,8 @@ def _embeddings_2d(word_vectors, words):
         logger.debug("Number of results from model didn't match input length - maybe foreign words?")
     else:
         for i in range(len(words_in_model)):
-            words_with_model_info.append({'word': words_in_model[i]['word'], 'x': two_d_embeddings[i][0], 'y': two_d_embeddings[i][1]})
+            words_with_model_info.append(
+                {'word': words_in_model[i]['word'], 'x': two_d_embeddings[i][0], 'y': two_d_embeddings[i][1]})
     results = []
     for word in words:
         word_model_data = next(iter([w for w in words_with_model_info if w["word"] == word]), None)
