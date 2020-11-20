@@ -5,6 +5,9 @@ raven==6.9.0
 gunicorn==19.9.0
 blinker==1.4
 mediacloud==3.2.1
+pathlib==1.0.1
 requests==2.20.0
-python-dotenv
+# Downgrade smart-open for it to support Python 2
+smart-open==1.10.1
+python-dotenv==0.15.0
 
