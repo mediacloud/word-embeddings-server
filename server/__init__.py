@@ -6,9 +6,9 @@ from flask import Flask
 from raven.conf import setup_logging
 from raven.contrib.flask import Sentry
 from raven.handlers.logging import SentryHandler
-import mediacloud
+import mediacloud.api
 
-VERSION = "2.3.0"
+VERSION = "2.4.0"
 
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
