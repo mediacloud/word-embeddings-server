@@ -77,13 +77,13 @@ def _get_cached_model(topics_id, snapshots_id):
 def get_topic_model(topics_id=None, snapshots_id=None):
     if not _is_topic_model_cached(topics_id, snapshots_id):
         all_snapshots = mc.topicSnapshotList(topics_id)
-        if len(all_snapshots) is 0:
+        if len(all_snapshots) == 0:
             raise RuntimeError('No snapshots for topic {}'.format(topics_id))
         snapshot = [s for s in all_snapshots if s['snapshots_id'] == int(snapshots_id)]
-        if len(snapshot) is 0:
+        if len(snapshot) == 0:
             raise RuntimeError('No snapshot {} in topic {}'.format(snapshots_id, topics_id))
         snapshot = snapshot[0]
-        if len(snapshot['word2vec_models']) is 0:
+        if len(snapshot['word2vec_models']) == 0:
             raise RuntimeError('No word2ve models for topic {}/{}'.format(topics_id, snapshots_id))
         model_info = snapshot['word2vec_models'][0]
         raw_model = mc.topicSnapshotWord2VecModel(topics_id, snapshots_id, model_info['models_id'])
