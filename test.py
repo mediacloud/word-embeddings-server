@@ -1,7 +1,14 @@
 import unittest
-import logging
 import sys
 import os
+import logging
+from dotenv import load_dotenv
+
+# load env-vars from .env file if there is one
+basedir = os.path.abspath(os.path.dirname(__file__))
+test_env = os.path.join(basedir, '.env')
+if os.path.isfile(test_env):
+    load_dotenv(dotenv_path=os.path.join(basedir, '.env'), verbose=True)
 
 import server.test.modelstest as models
 
