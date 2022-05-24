@@ -69,9 +69,9 @@ def _embeddings_2d(word_vectors, words):
             pass
     # reduce to a 2d representation for charting purposes
     embeddings = [word_vectors[word] for word in [w['cleaned_word'] for w in words_in_model]]
-    pca = PCA(n_components=2)
     try:
-        two_d_embeddings = pca.fit_transform(embeddings).tolist()
+        pca = PCA(n_components=2)
+        two_d_embeddings = pca.fit_transform(embeddings)
     except ValueError:
         # means there aren't any input words actually in the model
         two_d_embeddings = []
