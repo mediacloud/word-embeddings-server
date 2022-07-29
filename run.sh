@@ -1,1 +1,1 @@
-gunicorn server:app --timeout 500
+gunicorn server:app --timeout 500 --preload

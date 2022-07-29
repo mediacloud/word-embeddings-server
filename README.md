@@ -6,7 +6,7 @@ A micro-service to support analyzing words based on models of word embeddings (a
 Dev Installation
 ----------------
 
-1. Install python 3.6.5.
+1. Install python.
 2. Run `pip install -r requirements.txt` to install dependencies
 3. Run `python download-google-news-model.py` to download the google news model file.
  
